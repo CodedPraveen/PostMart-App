@@ -1,6 +1,6 @@
-import { mockProducts } from '@/services/mock';
 import { HorizontalProductRail } from '@/components/home/featured-products/HorizontalProductRail';
+import type { Product } from '@/types/product';
 
-export function TrendingProducts() {
-  return <HorizontalProductRail products={mockProducts.filter((product) => product.trending)} />;
+export function TrendingProducts({ products }: { products: Product[] }) {
+  return <HorizontalProductRail products={products} />;
 }

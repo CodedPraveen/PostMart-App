@@ -1,37 +1,67 @@
-# Phase 2 integration audit
+# Phase 2 integration status and contracts
 
-Inspected on 2026-09-25. This document records the existing `com/` contracts without changing that project.
+Updated 2026-09-25. PR #3 is merged into `origin/main`. This records the worktree state, not a claim that Phase 2 is complete or deployed.
 
-## Existing backend surface
+## Source of truth
 
-| Area | Existing implementation | Mobile callable route today |
-| --- | --- | --- |
-| Featured and trending shoes | `productService` and `storefrontService` | `GET /api/homepage/sections/featured` and `/trending` |
-| Full catalog, product detail, category, search | `productService`, server-rendered pages | None found |
-| Cart | `cartService`, `cart-actions.js` | None found |
-| Wishlist | `wishlistService`, `wishlist-actions.js` | None found |
-| Addresses | `addressService`, `address-actions.js` | None found |
-| Orders | `orderService`, `order-actions.js`; detail and invoice routes | `GET /api/orders/[orderId]` and `/invoice`, Clerk protected |
-| Checkout | `checkoutService`, `checkout-flow-service`, Razorpay webhook and verification | `POST /api/checkout/session`, `/api/checkout/razorpay/verify` |
+The existing `com/` Next.js/Prisma application owns customers, catalog, cart, pricing, stock, checkout, Razorpay, orders, and webhooks. The mobile app uses its existing typed API client and TanStack Query. No second backend or database has been introduced.
 
-The customer action functions marked `use server` are not a stable mobile JSON API. The customer services can be reused by new route handlers once backend changes are approved. Cart and wishlist mutations already scope database operations to a resolved user ID. Checkout already creates the Razorpay order on the server and verifies payment through the server; mobile must use the same flow once authentication and contracts are settled.
+`com/.env.local.example` named in the original brief is absent; `com/.env.example` is the backend reference. Only `EXPO_PUBLIC_POSTMART_API_URL` and `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` belong in mobile configuration. `TWO_FACTOR_API_KEY`, Clerk secrets, database URLs, Razorpay secrets, and webhook secrets are server-only.
 
-## Authentication and identity gap
+## Current mobile-callable routes in the worktree
 
-`requireDbUser` resolves the Clerk session to a PostMart `User`. The `User` model requires unique `clerkId` and unique `email`; there is no phone identity table, phone session verifier, OTP provider interface, or verified linking flow. Phone sign-in cannot be connected safely by changing only the mobile app. Account linking must verify ownership of both identities on the backend and keep one PostMart user ID.
+These routes are newly added under `com/app/api/mobile/` and have passed the backend production build. They are not yet deployed or end-to-end tested.
 
-The current checkout route rejects cross-site browser requests and uses the Clerk context established by the website middleware. A native bearer token must be tested against that context before enabling checkout in mobile. No client payment success flag may create an order.
+| Method and route | Input | Response | Authentication |
+| --- | --- | --- | --- |
+| `GET /api/mobile/products` | `page` (default 1), `pageSize` (1–50, default 20), `q`, `category`, repeated `size`, `color`, `priceRange`, `sort` (`latest`, `popular`, `price-asc`, `price-desc`) | `{ items, page, pageSize, total, hasMore }` using `productService.search` and its existing mapper | Public |
+| `GET /api/mobile/products/[id]` | PostMart product ID | `{ product }` from `productService.getById` | Public |
+| `GET /api/mobile/categories` | None | `{ items }` with ID, name, slug, collection, parent ID, public image | Public |
+| `GET /api/mobile/profile` | None | `{ profile: { id, name, email, phone } }` | Customer bearer token |
+| `GET /api/mobile/cart` | None | Existing `cartService.getCartSummary` result | Customer bearer |
+| `POST /api/mobile/cart` | `{ productId, size, quantity }` | Authoritative cart summary | Customer bearer |
+| `PATCH /api/mobile/cart/[lineId]` | `{ quantity }`; zero removes | Authoritative cart summary | Customer bearer; service scopes line to user |
+| `DELETE /api/mobile/cart/[lineId]` | None | Authoritative cart summary | Customer bearer; service scopes line to user |
+| `GET /api/mobile/wishlist` | None | `{ items }`, mapped products | Customer bearer |
+| `POST /api/mobile/wishlist` | `{ productId }` | `{ added: true }` | Customer bearer |
+| `DELETE /api/mobile/wishlist/[productId]` | None | 204 | Customer bearer |
+| `GET /api/mobile/addresses` | None | `{ items }` | Customer bearer |
+| `POST /api/mobile/addresses` | Address fields, optional `isDefault` | `{ address }` | Customer bearer |
+| `PATCH /api/mobile/addresses/[id]` | Full address fields, optional `isDefault` | `{ address }` | Customer bearer; owner-scoped service |
+| `DELETE /api/mobile/addresses/[id]` | None | 204 | Customer bearer; owner-scoped service |
+| `POST /api/mobile/addresses/[id]/default` | None | `{ address }` | Customer bearer; owner-scoped service |
+| `GET /api/mobile/orders` | `page`, `pageSize` | `{ items, page, total, hasMore }` | Customer bearer; user-derived query |
+| `GET /api/mobile/orders/[id]` | Order ID | `{ order }` or 404 | Customer bearer; explicit ownership check |
+| `POST /api/mobile/checkout/session` | `{ addressId }` | Existing checkout session response; Razorpay forced | Customer bearer; saved address ownership checked |
+| `POST /api/mobile/checkout/razorpay/verify` | Razorpay order, payment, and signature IDs | Existing verification/fulfillment result or bounded error | Customer bearer; server verifies payment |
+| `POST /api/mobile/auth/phone/request` and `/verify` | Phone challenge and OTP proof | Fail closed with 503 until 2Factor contract is validated | Public, rate-limited |
+| `POST /api/mobile/auth/phone/logout` | Phone bearer token | Revokes its hashed server session | Phone bearer |
+| `POST /api/mobile/auth/phone/link/request` and `/verify` | Phone challenge and OTP proof | Fail closed with 503 until 2Factor contract is validated | Clerk bearer plus phone proof |
 
-## Environment
+Protected routes reject requests without an `Authorization: Bearer <token>` header; they do not accept browser cookies as mobile credentials. The token can be a Clerk session token, or a hashed-at-rest PostMart phone session once OTP is enabled. The backend resolves the customer, not a client-supplied `userId`. Order DTOs omit user records, payment signatures, and raw provider payloads. Mutations use the existing backend rate-limit helper, which is in-memory per instance. The phone service also records challenge windows in PostgreSQL, but distributed abuse protection and live provider behavior remain unvalidated.
 
-The brief names `com/.env.local.example`, but that file is absent. `com/.env.example` is present. The only values identified for the mobile app are the public application origin and the existing Clerk publishable key. Database, Clerk secret, Razorpay secret, webhook, Redis, Google server, and SMS keys remain server side. The mobile `.env.example` contains only public values.
+The new mobile checkout routes adapt the existing website checkout and Razorpay verification services to native bearer auth, but have not been exercised with a native payment SDK or real provider. The existing webhook and fulfillment path must remain authoritative; a client payment callback is not proof of purchase. Existing `GET /api/orders/[orderId]` and `/invoice` are web routes and are not used as mobile customer DTOs.
 
-## Proposed backend contracts requiring explicit approval
+## Current mobile wiring
 
-Expose the existing service behavior through customer JSON routes for catalog detail/list/search, cart, wishlist, profile, addresses, and order list. Reuse the current checkout session and verification services after their native auth and request policy are checked. Each protected route must resolve a PostMart user on the server, validate inputs, enforce rate limits where appropriate, and scope reads and writes to that user. Add a backend phone provider interface and identity/linking model before enabling phone OTP. The future provider implementation and credentials remain undecided.
+The new catalog service validates `/api/mobile/products`, `/products/[id]`, and `/categories` responses. Home, category listing, search, and product detail now query real catalog data; listing uses infinite-query pagination. Featured and trending home sections use the previously verified `/api/homepage/sections/[section]` endpoint. The original mock product source remains for Phase 1-only flows and should be removed only after those flows are connected. Search currently displays the first server page only. The cart and wishlist buttons still write local Zustand state; addresses, checkout, and orders are not yet connected. Do not interpret the catalog screens as a complete commerce flow.
 
-Do not enable guest cart merge until the backend contract specifies how duplicate variants, stock limits, unavailable products, and existing cart lines are reconciled. The server must return the authoritative merged cart and any rejected lines.
+Clerk Expo dependencies and config plugins are installed. `PostmartAuthProvider` wraps the app, uses Clerk's secure token cache and hosted sign-in, injects the session token into the API client, and exposes sign-out that clears cached queries. Profile reads the server's `/api/mobile/profile` response. This is code wiring, **not** a validated Google/email sign-in: Clerk dashboard configuration, redirect/native allowlisting, session restoration, and Android/iOS behavior have not been exercised. Phone sign-in has no mobile UI or live provider.
 
-## Current mobile progress
+## Identity and OTP decision
 
-TanStack Query and a typed API client are present. The API client validates its HTTPS origin, attaches a supplied short-lived token for protected requests, times out, and maps HTTP and network failures to user-safe errors. The public homepage route has a validated response type and a query hook. Phase 1 screens still use local mock catalog and cart data until the full customer contracts can be connected safely.
+The new, **undeployed** Prisma migration makes `User.clerkId` and `User.email` nullable, adds unique `User.phone`, and adds phone challenge and hashed-session tables. The mobile API can resolve Clerk or phone sessions while web `requireDbUser` remains Clerk-only. `userService.upsertFromClerk` no longer silently reassigns `clerkId` on an email match. A separate phone-link request/verify route requires a Clerk bearer session and a verified phone challenge; it refuses phones already owned by another customer and does not implement account merging.
+
+The user selected a backend `PhoneAuthProvider` abstraction now, with live 2Factor validation later. Public 2Factor pages show inconsistent API generations, and no account-specific contract or sandbox key is available. The adapter deliberately returns unavailable rather than guessing an OTP endpoint or claiming phone sign-in works. The service code includes expiry, single-use attempts, cooldown, and per-phone/IP windows; these have not been proven against PostgreSQL or a live provider. `TWO_FACTOR_API_KEY` is server-only. Linking must prove control of both identities; matching name, email, or phone is insufficient.
+
+## Remaining Phase 2 gates
+
+- Validate and deploy the identity migration; complete a tested 2Factor adapter when the account contract is available, then build and verify phone sign-in UI and identity linking.
+- Validate mobile Clerk Google/email, bearer token injection, session restore, and logout on devices; complete server-backed cart, wishlist, addresses, checkout, and orders UI.
+- Fix/validate cart variant and stock behavior, define deterministic guest-cart merge, and move list pagination to efficient database queries if catalog size warrants it.
+- Verify native checkout request policy, Razorpay SDK/native flow, webhook-driven order creation, amount/signature/idempotency/inventory behavior, and IDOR/abuse test cases.
+- Run backend tests, mobile tests, Expo Doctor/export, Android/iOS QA, and a real end-to-end purchase. None of these are implied by a successful compile.
+
+## Checks so far
+
+Backend `npm run lint` passed and `npm run build` exited 0 after the phone and checkout routes. The build emitted Prisma connection failures while statically generating pages because the configured remote database was unreachable, so a successful compile is not a database-backed pass. Mobile `npm run typecheck` and `npm run lint` passed after the Clerk/profile/catalog edits; Expo Doctor passed 21/21 checks and Expo web export succeeded. No migration application, real database integration test, Android/iOS device QA, OTP delivery, or end-to-end checkout/payment test has passed.
