@@ -3,7 +3,7 @@ import { ApiError } from '@/services/api/client/api-error';
 import { apiRequest } from '@/services/api/client/api-client';
 
 // Exact public route: app/api/homepage/sections/[section]/route.js in `com`.
-const productSchema = z.object({
+export const productSchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
@@ -19,6 +19,7 @@ const productSchema = z.object({
   categoryLabel: z.string(),
   isNew: z.boolean(),
   isTrending: z.boolean(),
+  variants: z.array(z.object({ id: z.string(), size: z.number(), stock: z.number(), colorKey: z.string(), price: z.number() })).optional(),
 }).passthrough();
 
 const homepageSectionSchema = z.object({
