@@ -6,9 +6,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { colors } from '@/constants/colors';
 import { AppNotice } from '@/components/feedback/notice/AppNotice';
 import { queryClient } from '@/lib/query-client';
+import { PostmartAuthProvider } from '@/features/auth/PostmartAuthProvider';
 
 export default function RootLayout() {
   return (
+    <PostmartAuthProvider>
     <QueryClientProvider client={queryClient}>
     <SafeAreaProvider>
       <StatusBar style="dark" />
@@ -20,5 +22,6 @@ export default function RootLayout() {
       <AppNotice />
     </SafeAreaProvider>
     </QueryClientProvider>
+    </PostmartAuthProvider>
   );
 }

@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Keyboard, Text, useWindowDimensions, View } from 'react-native';
-import { mockProducts } from '@/services/mock';
+import { useCatalog } from '@/services/api/products/useCatalog';
 import { AppHeader } from '@/components/layout/app-header/AppHeader';
 import { ScreenContainer } from '@/components/layout/screen-container/ScreenContainer';
 import { SearchBar } from '@/components/search/search-bar/SearchBar';
@@ -10,24 +10,14 @@ import { EmptyState } from '@/components/feedback/empty-state/EmptyState';
 import { ProductGridSkeleton } from '@/components/feedback/loading/ProductGridSkeleton';
 import { ErrorState } from '@/components/feedback/error-state/ErrorState';
 
-type SearchStatus = 'initial' | 'searching' | 'results' | 'empty' | 'error';
-
 export function SearchScreen() {
   const { width } = useWindowDimensions();
   const [query, setQuery] = useState('');
   const [submitted, setSubmitted] = useState('');
   const [recent, setRecent] = useState(['white sneakers', 'running', 'slides']);
-  const [forcedStatus, setForcedStatus] = useState<SearchStatus | null>(null);
-
-  const results = useMemo(() => {
-    const term = (submitted || query).trim().toLowerCase();
-    if (!term) return [];
-    return mockProducts.filter((product) =>
-      [product.name, product.brand, product.category].some((value) => value.toLowerCase().includes(term)),
-    );
-  }, [query, submitted]);
-
-  const status: SearchStatus = forcedStatus ?? (!query.trim() ? 'initial' : results.length ? 'results' : 'empty');
+  const search = useCatalog({ query: submitted }, Boolean(submitted));
+  const results = search.data?.pages.flatMap((page) => page.items) ?? [];
+  const status = !submitted ? 'initial' : search.isPending ? 'searching' : search.isError ? 'error' : results.length ? 'results' : 'empty';
   const submit = () => {
     const clean = query.trim();
     if (!clean) return;
@@ -44,7 +34,7 @@ export function SearchScreen() {
     <ScreenContainer>
       <AppHeader title="Search" />
       <View className="px-5">
-        <SearchBar value={query} onChangeText={(value) => { setQuery(value); setForcedStatus(null); }} onSubmit={submit} />
+        <SearchBar value={query} onChangeText={(value) => { setQuery(value); if (!value.trim()) setSubmitted(''); }} onSubmit={submit} />
 
         {status === 'initial' ? (
           <>
@@ -52,21 +42,21 @@ export function SearchScreen() {
             <View className="mt-8 rounded-lg bg-secondary p-6">
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-primary">Try something new</Text>
               <Text className="mt-2 text-2xl font-semibold text-white">Search by mood, movement or style.</Text>
-              <Text className="mt-2 text-sm leading-5 text-white/65">Try “running”, “sneakers” or a brand from our curated mock collection.</Text>
+              <Text className="mt-2 text-sm leading-5 text-white/65">Try “running”, “sneakers” or a favorite brand.</Text>
             </View>
           </>
         ) : null}
       </View>
 
       {status === 'searching' ? <View className="mt-8"><ProductGridSkeleton /></View> : null}
-      {status === 'error' ? <ErrorState onRetry={() => setForcedStatus(null)} /> : null}
+      {status === 'error' ? <ErrorState onRetry={() => search.refetch()} /> : null}
       {status === 'empty' ? (
         <EmptyState
           icon="search"
           title="No matching pairs"
           description={`We could not find anything for “${query}”. Try a broader style or category.`}
           actionLabel="Clear search"
-          onAction={() => setQuery('')}
+          onAction={() => { setQuery(''); setSubmitted(''); }}
         />
       ) : null}
       {status === 'results' ? (

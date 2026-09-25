@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { FlatList, Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors } from '@/constants/colors';
-import type { Product } from '@/types/product';
-import { mockCategories, mockProducts } from '@/services/mock';
+import { useCatalog, useCategories } from '@/services/api/products/useCatalog';
+import type { CatalogSort } from '@/services/api/products/catalog-api';
 import { AppHeader } from '@/components/layout/app-header/AppHeader';
 import { ScreenContainer } from '@/components/layout/screen-container/ScreenContainer';
 import { ProductCard } from '@/components/product/product-card/ProductCard';
@@ -13,39 +13,31 @@ import { EmptyState } from '@/components/feedback/empty-state/EmptyState';
 import { ErrorState } from '@/components/feedback/error-state/ErrorState';
 import { ProductGridSkeleton } from '@/components/feedback/loading/ProductGridSkeleton';
 
-type ListingStatus = 'normal' | 'loading' | 'error';
-type SortOption = 'featured' | 'price-low' | 'price-high' | 'rating';
-
 interface ProductListingScreenProps {
   initialCategory?: string;
-  status?: ListingStatus;
 }
 
-const sortLabels: Record<SortOption, string> = {
-  featured: 'Featured',
-  'price-low': 'Price: low to high',
-  'price-high': 'Price: high to low',
-  rating: 'Top rated',
+const sortLabels: Record<CatalogSort, string> = {
+  latest: 'Latest',
+  'price-asc': 'Price: low to high',
+  'price-desc': 'Price: high to low',
+  popular: 'Most popular',
 };
 
-export function ProductListingScreen({ initialCategory = 'all', status = 'normal' }: ProductListingScreenProps) {
+export function ProductListingScreen({ initialCategory = 'all' }: ProductListingScreenProps) {
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState(initialCategory);
-  const [sort, setSort] = useState<SortOption>('featured');
+  const [sort, setSort] = useState<CatalogSort>('latest');
   const [activeModal, setActiveModal] = useState<'filter' | 'sort' | null>(null);
+  const catalog = useCatalog({ category, sort });
+  const categories = useCategories();
 
-  const products = useMemo(() => {
-    const filtered = category === 'all' ? [...mockProducts] : mockProducts.filter((item) => item.categorySlug === category);
-    if (sort === 'price-low') return filtered.sort((a, b) => a.price - b.price);
-    if (sort === 'price-high') return filtered.sort((a, b) => b.price - a.price);
-    if (sort === 'rating') return filtered.sort((a, b) => b.rating - a.rating);
-    return filtered.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
-  }, [category, sort]);
+  const products = catalog.data?.pages.flatMap((page) => page.items) ?? [];
 
-  const categoryName = category === 'all' ? 'All shoes' : mockCategories.find((item) => item.slug === category)?.name ?? 'Collection';
+  const categoryName = category === 'all' ? 'All shoes' : categories.data?.find((item) => item.slug === category)?.name ?? 'Collection';
   const cardWidth = (width - 52) / 2;
 
-  if (status === 'loading') {
+  if (catalog.isPending) {
     return (
       <ScreenContainer>
         <AppHeader title={categoryName} showBack />
@@ -54,11 +46,11 @@ export function ProductListingScreen({ initialCategory = 'all', status = 'normal
     );
   }
 
-  if (status === 'error') {
+  if (catalog.isError) {
     return (
       <ScreenContainer>
         <AppHeader title={categoryName} showBack />
-        <ErrorState onRetry={() => undefined} />
+        <ErrorState onRetry={() => catalog.refetch()} />
       </ScreenContainer>
     );
   }
@@ -68,7 +60,7 @@ export function ProductListingScreen({ initialCategory = 'all', status = 'normal
       <AppHeader title={categoryName} showBack />
       <View className="px-5 pb-4 pt-2">
         <Text className="text-[28px] font-bold text-secondary">{categoryName}</Text>
-        <Text className="mt-1 text-sm text-muted">{products.length} considered pairs</Text>
+        <Text className="mt-1 text-sm text-muted">{catalog.data?.pages[0]?.total ?? products.length} considered pairs</Text>
         <View className="mt-5 flex-row gap-3">
           <Pressable
             accessibilityRole="button"
@@ -98,6 +90,10 @@ export function ProductListingScreen({ initialCategory = 'all', status = 'normal
         contentContainerClassName="gap-y-7 px-5 pb-10"
         showsVerticalScrollIndicator={false}
         initialNumToRender={6}
+        onEndReached={() => { if (catalog.hasNextPage && !catalog.isFetchingNextPage) void catalog.fetchNextPage(); }}
+        onEndReachedThreshold={0.5}
+        refreshing={catalog.isRefetching}
+        onRefresh={() => { void catalog.refetch(); }}
         ListEmptyComponent={
           <EmptyState title="No pairs found" description="Try a different category or clear your filters." icon="search" />
         }
@@ -106,7 +102,7 @@ export function ProductListingScreen({ initialCategory = 'all', status = 'normal
       <AppModal visible={activeModal === 'filter'} title="Filter by category" onClose={() => setActiveModal(null)}>
         <View className="flex-row flex-wrap gap-3">
           <Chip label="All shoes" selected={category === 'all'} onPress={() => { setCategory('all'); setActiveModal(null); }} />
-          {mockCategories.map((item) => (
+          {(categories.data ?? []).map((item) => (
             <Chip
               key={item.slug}
               label={item.name}
@@ -119,7 +115,7 @@ export function ProductListingScreen({ initialCategory = 'all', status = 'normal
 
       <AppModal visible={activeModal === 'sort'} title="Sort products" onClose={() => setActiveModal(null)}>
         <View className="gap-3">
-          {(Object.keys(sortLabels) as SortOption[]).map((option) => (
+          {(Object.keys(sortLabels) as CatalogSort[]).map((option) => (
             <Chip
               key={option}
               label={sortLabels[option]}
