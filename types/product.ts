@@ -12,8 +12,8 @@ export interface Product {
   imageAlt: string;
   description: string;
   sizes: string[];
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
   badge?: ProductBadge;
   featured?: boolean;
   trending?: boolean;
