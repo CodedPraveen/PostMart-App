@@ -10,7 +10,7 @@ interface ProductRatingProps {
 export function ProductRating({ rating, reviewCount }: ProductRatingProps) {
   return (
     <View className="flex-row items-center">
-      <Feather name="star" size={15} color={colors.primary} />
+      <Feather name="star" size={15} color={colors.accent} />
       <Text className="ml-1 text-sm font-semibold text-secondary">{rating.toFixed(1)}</Text>
       <Text className="ml-1 text-sm text-muted">({reviewCount})</Text>
     </View>

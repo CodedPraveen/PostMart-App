@@ -8,7 +8,7 @@ interface BadgeProps {
 
 export function Badge({ label, tone = 'brand' }: BadgeProps) {
   const tones = {
-    brand: 'bg-primary/10 text-primary',
+    brand: 'bg-accent/10 text-accent',
     dark: 'bg-secondary text-white',
     success: 'bg-success/10 text-success',
     warning: 'bg-warning/10 text-warning',

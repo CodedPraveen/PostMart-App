@@ -18,7 +18,7 @@ export function AppNotice() {
 
   return (
     <View className="absolute bottom-24 left-5 right-5 z-50 flex-row items-center rounded-lg bg-secondary px-4 py-3">
-      <Feather name="info" size={19} color={colors.primary} />
+      <Feather name="info" size={19} color={colors.accent} />
       <Text accessibilityLiveRegion="polite" className="ml-3 flex-1 text-sm leading-5 text-white">{notice}</Text>
       <Pressable accessibilityLabel="Dismiss message" hitSlop={10} onPress={dismiss}>
         <Feather name="x" size={18} color={colors.surface} />

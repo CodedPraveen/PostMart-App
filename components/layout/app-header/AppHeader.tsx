@@ -39,7 +39,7 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
       >
         <Feather name="shopping-bag" size={22} color={colors.secondary} />
         {cartCount > 0 ? (
-          <View className="absolute right-0 top-0 min-w-5 items-center rounded-full bg-primary px-1 py-0.5">
+          <View className="absolute right-0 top-0 min-w-5 items-center rounded-full bg-accent px-1 py-0.5">
             <Text className="text-[10px] font-bold text-white">{Math.min(cartCount, 99)}</Text>
           </View>
         ) : null}

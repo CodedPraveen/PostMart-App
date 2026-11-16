@@ -16,7 +16,7 @@ export function ProductPrice({ price, oldPrice, size = 'sm' }: ProductPriceProps
         {formatCurrency(price)}
       </Text>
       {oldPrice ? <Text className="text-sm text-muted line-through">{formatCurrency(oldPrice)}</Text> : null}
-      {discount > 0 ? <Text className="text-xs font-bold text-primary">{discount}% OFF</Text> : null}
+      {discount > 0 ? <Text className="text-xs font-bold text-accent">{discount}% OFF</Text> : null}
     </View>
   );
 }

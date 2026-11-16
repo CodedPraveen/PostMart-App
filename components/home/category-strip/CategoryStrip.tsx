@@ -24,7 +24,7 @@ export function CategoryStrip({ categories }: CategoryStripProps) {
         >
           {item.image ? <ProductImage uri={item.image} alt={item.name} className="h-36 w-full" /> : <View className="h-36 w-full bg-background" />}
           <View className="p-3">
-            <Text className="text-[11px] font-semibold uppercase tracking-wider text-primary">Shop category</Text>
+            <Text className="text-[11px] font-semibold uppercase tracking-wider text-accent">Shop category</Text>
             <Text className="mt-1 text-base font-semibold text-secondary">{item.name}</Text>
           </View>
         </Pressable>

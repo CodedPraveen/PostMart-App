@@ -40,7 +40,7 @@ export function SearchScreen() {
           <>
             <RecentSearches searches={recent} onSelect={selectRecent} onClear={() => setRecent([])} />
             <View className="mt-8 rounded-lg bg-secondary p-6">
-              <Text className="text-xs font-bold uppercase tracking-[1.5px] text-primary">Try something new</Text>
+              <Text className="text-xs font-bold uppercase tracking-[1.5px] text-accent">Try something new</Text>
               <Text className="mt-2 text-2xl font-semibold text-white">Search by mood, movement or style.</Text>
               <Text className="mt-2 text-sm leading-5 text-white/65">Try “running”, “sneakers” or a favorite brand.</Text>
             </View>

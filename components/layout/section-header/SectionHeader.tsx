@@ -11,7 +11,7 @@ export function SectionHeader({ eyebrow, title, actionLabel, onAction }: Section
   return (
     <View className="mb-4 flex-row items-end justify-between px-5">
       <View>
-        {eyebrow ? <Text className="mb-1 text-xs font-semibold uppercase tracking-[1.5px] text-primary">{eyebrow}</Text> : null}
+        {eyebrow ? <Text className="mb-1 text-xs font-semibold uppercase tracking-[1.5px] text-accent">{eyebrow}</Text> : null}
         <Text className="text-[22px] font-semibold text-secondary">{title}</Text>
       </View>
       {actionLabel && onAction ? (
