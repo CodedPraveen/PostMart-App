@@ -27,7 +27,7 @@ export const ProductCard = memo(function ProductCard({ product, width }: Product
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`View ${product.name}, ${product.price} rupees`}
-        className="aspect-[4/5] overflow-hidden rounded bg-[#F0F0ED]"
+        className="aspect-[4/5] overflow-hidden rounded bg-background"
         onPress={openProduct}
       >
         <ProductImage uri={product.image} alt={product.imageAlt} className="h-full w-full" />
