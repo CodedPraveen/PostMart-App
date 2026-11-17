@@ -1,4 +1,4 @@
-export const typography = {
+const typeScale = {
   display: { fontSize: 36, lineHeight: 42, fontWeight: '700' as const },
   h1: { fontSize: 28, lineHeight: 34, fontWeight: '700' as const },
   h2: { fontSize: 22, lineHeight: 28, fontWeight: '600' as const },
@@ -7,4 +7,22 @@ export const typography = {
   bodyMedium: { fontSize: 15, lineHeight: 22, fontWeight: '500' as const },
   caption: { fontSize: 12, lineHeight: 16, fontWeight: '500' as const },
   button: { fontSize: 15, lineHeight: 20, fontWeight: '600' as const },
+} as const;
+
+/** Semantic roles used by screens and shared components. The app uses the platform system font. */
+export const typography = {
+  ...typeScale,
+  screenTitle: typeScale.h1,
+  sectionHeading: typeScale.h2,
+  cardTitle: typeScale.h3,
+  productName: typeScale.bodyMedium,
+  productPrice: { fontSize: 16, lineHeight: 22, fontWeight: '600' as const },
+  originalPrice: { fontSize: 14, lineHeight: 20, fontWeight: '400' as const },
+  description: typeScale.body,
+  body: typeScale.body,
+  caption: typeScale.caption,
+  buttonLabel: typeScale.button,
+  inputLabel: typeScale.bodyMedium,
+  helper: typeScale.caption,
+  error: typeScale.caption,
 } as const;
