@@ -14,7 +14,9 @@ The banner uses a minimum height, constrained headline width, and flexible verti
 
 ## Image asset
 
-No suitable local footwear campaign image exists in the repository. The existing local assets are the PostMart logo and app icons; the previous `HomeHero` used a remote Unsplash URL, which was not reused. The missing asset should be an editorial footwear image at approximately **1200 × 900 px** (4:3), with the subject positioned to leave negative space for light text and a dark, premium neutral palette. It should be added under `assets/images/` before replacing the fallback surface.
+The final campaign asset is `assets/images/home-hero-campaign.png`, a local 1200 × 900 px PNG (4:3). It is a generated premium footwear editorial image with a single dark neutral sneaker weighted to the right and negative space on the left for copy. It contains no text, logo, or remote dependency.
+
+`HeroBanner` renders the asset with React Native `ImageBackground` and `resizeMode="cover"`. A restrained Deep Dark overlay (`bg-secondary/35`) keeps the white campaign copy readable while retaining the shoe detail.
 
 ## CTA and scope
 
@@ -22,4 +24,4 @@ The banner CTA opens the existing `routes.category('sneakers')` collection route
 
 ## Validation
 
-Validation results are reported in the implementation handoff. Device/emulator testing was not available in this environment, and the missing campaign image remains the only visual limitation.
+Validation results are reported in the implementation handoff. Device/emulator testing was not available in this environment.
