@@ -23,7 +23,6 @@ export function HomeScreen() {
   const featured = featuredQuery.data?.products.map(toUiProduct) ?? [];
   const trending = trendingQuery.data?.products.map(toUiProduct) ?? [];
   const newest = catalogQuery.data?.pages[0]?.items.filter((product) => product.isNew) ?? [];
-  const catalogError = catalogQuery.isError;
 
   return (
     <ScreenContainer>
@@ -88,13 +87,16 @@ export function HomeScreen() {
 
       <View className="mt-10">
         <SectionHeader title="New arrivals" eyebrow="Just landed" />
-        <HorizontalProductRail products={newest} />
+        {catalogQuery.isError ? (
+          <ErrorState
+            title="New arrivals unavailable"
+            description="We could not load the latest footwear right now. Please try again."
+            onRetry={() => catalogQuery.refetch()}
+          />
+        ) : (
+          <HorizontalProductRail products={newest} />
+        )}
       </View>
-      {catalogError ? <ErrorState onRetry={() => {
-        void featuredQuery.refetch();
-        void trendingQuery.refetch();
-        void catalogQuery.refetch();
-      }} /> : null}
     </ScreenContainer>
   );
 }

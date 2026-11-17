@@ -10,7 +10,7 @@ Both sections reuse the existing `HorizontalProductRail`, `ProductCard`, `Produc
 
 `HorizontalProductRail` now supports opt-in horizontal loading skeletons and useful empty states. Featured and Trending pass those states explicitly while New Arrivals continues using the existing default behavior. Cards retain consistent image proportions, product information, spacing, radius, and fallback image handling.
 
-Featured and Trending API failures are localized beneath their section headings with the shared `ErrorState` and section-specific retry actions. The global Home error state now handles only the latest-catalog query, avoiding duplicate messages and unnecessary refetches.
+Featured, Trending, and New Arrivals API failures are localized beneath their section headings with the shared `ErrorState` and section-specific retry actions. New Arrivals retries only `catalogQuery.refetch()`. There is no global Home error block, avoiding duplicate messages and unrelated refetches.
 
 ## Scope and validation
 
