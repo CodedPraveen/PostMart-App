@@ -13,7 +13,6 @@ import { CategoryStrip } from '@/components/home/category-strip/CategoryStrip';
 import { LifestyleSection } from '@/components/home/lifestyle/LifestyleSection';
 import { HorizontalProductRail } from '@/components/home/featured-products/HorizontalProductRail';
 import { TrendingProducts } from '@/components/home/trending-products/TrendingProducts';
-import { ProductGridSkeleton } from '@/components/feedback/loading/ProductGridSkeleton';
 import { ErrorState } from '@/components/feedback/error-state/ErrorState';
 
 export function HomeScreen() {
@@ -24,7 +23,7 @@ export function HomeScreen() {
   const featured = featuredQuery.data?.products.map(toUiProduct) ?? [];
   const trending = trendingQuery.data?.products.map(toUiProduct) ?? [];
   const newest = catalogQuery.data?.pages[0]?.items.filter((product) => product.isNew) ?? [];
-  const catalogError = featuredQuery.isError || trendingQuery.isError || catalogQuery.isError;
+  const catalogError = catalogQuery.isError;
 
   return (
     <ScreenContainer>
@@ -53,7 +52,20 @@ export function HomeScreen() {
 
       <View className="mt-10">
         <SectionHeader title="Featured now" eyebrow="The PostMart edit" />
-        {featuredQuery.isPending ? <ProductGridSkeleton /> : <HorizontalProductRail products={featured} />}
+        {featuredQuery.isError ? (
+          <ErrorState
+            title="Featured products unavailable"
+            description="We could not load the PostMart edit right now. Please try again."
+            onRetry={() => featuredQuery.refetch()}
+          />
+        ) : (
+          <HorizontalProductRail
+            products={featured}
+            loading={featuredQuery.isPending}
+            emptyTitle="No featured footwear yet"
+            emptyDescription="New editorial picks will appear here soon."
+          />
+        )}
       </View>
 
       <View className="mt-10">
@@ -63,7 +75,15 @@ export function HomeScreen() {
 
       <View className="mt-10">
         <SectionHeader title="Most wanted" eyebrow="Popular this week" />
-        {trendingQuery.isPending ? <ProductGridSkeleton /> : <TrendingProducts products={trending} />}
+        {trendingQuery.isError ? (
+          <ErrorState
+            title="Trending products unavailable"
+            description="We could not load popular footwear right now. Please try again."
+            onRetry={() => trendingQuery.refetch()}
+          />
+        ) : (
+          <TrendingProducts products={trending} loading={trendingQuery.isPending} />
+        )}
       </View>
 
       <View className="mt-10">
@@ -74,7 +94,6 @@ export function HomeScreen() {
         void featuredQuery.refetch();
         void trendingQuery.refetch();
         void catalogQuery.refetch();
-        void categoriesQuery.refetch();
       }} /> : null}
     </ScreenContainer>
   );
