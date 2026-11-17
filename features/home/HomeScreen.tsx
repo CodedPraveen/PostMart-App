@@ -94,7 +94,12 @@ export function HomeScreen() {
             onRetry={() => catalogQuery.refetch()}
           />
         ) : (
-          <HorizontalProductRail products={newest} />
+          <HorizontalProductRail
+            products={newest}
+            loading={catalogQuery.isPending}
+            emptyTitle="No new arrivals yet"
+            emptyDescription="Fresh footwear will appear here as it lands."
+          />
         )}
       </View>
     </ScreenContainer>
