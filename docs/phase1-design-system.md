@@ -1,43 +1,45 @@
-# PostMart Phase 1 Design System
+# Phase 1 Design System
 
-This document describes the implemented Phase 1 theme and reusable UI tokens. Home remains visually unchanged; its premium layout is reserved for Phase 2.
+PostMart Mobile uses a Premium Minimal visual system. Deep Dark and Warm Off-White are the dominant colors; orange is reserved for small accent states.
 
-## Colors
+## Color palette
 
-`constants/palette.json` is the single source of truth for the approved palette. `constants/colors.ts` exposes semantic names for React Native, and `tailwind.config.js` consumes the same JSON values for NativeWind.
+The source of truth is `constants/palette.json`. `constants/colors.ts` consumes it for React Native semantic tokens, and `tailwind.config.js` consumes the same file for NativeWind semantic names.
 
 | Token | Value | Use |
 | --- | --- | --- |
-| Deep Dark | `#171717` | Primary actions, headings, dark surfaces |
-| Warm Off-White | `#F7F7F5` | Screen background |
-| Orange | `#E54503` | Limited brand accent and discount emphasis |
-| White | `#FFFFFF` | Cards, inputs, and surfaces |
-| Muted Grey | `#737373` | Supporting text and icons |
-| Border Grey | `#E5E5E3` | Borders and dividers |
-| Success | `#18794E` | Positive status |
-| Warning | `#A86200` | Low-stock and warning status |
-| Error | `#C62828` | Validation and destructive status |
+| `deepDark` / `primary` / `secondary` | `#171717` | Primary actions, headings, body text, default icons |
+| `warmOffWhite` / `background` | `#F7F7F5` | Screen and image-placeholder backgrounds |
+| `orange` / `accent` | `#E54503` | Active favourites, sale labels, ratings, small indicators |
+| `white` / `surface` | `#FFFFFF` | Cards, inputs, navigation surfaces |
+| `mutedGrey` / `muted` | `#737373` | Secondary text, placeholders, inactive icons |
+| `borderGrey` / `border` | `#E5E5E3` | Borders and dividers |
+| `success` | `#18794E` | Success states |
+| `warning` | `#A86200` | Warning states |
+| `error` | `#C62828` | Error states |
 
 ## Typography
 
-`constants/typography.ts` provides the shared React Native metrics: `screenTitle`, `sectionHeading`, `cardTitle`, `productName`, `productPrice`, `body`, `caption`, `button`, `inputLabel`, `helper`, and `error`. Existing `display`, `h1`, `h2`, `h3`, and `bodyMedium` aliases remain available for compatibility.
+Semantic roles live in `constants/typography.ts`: screen titles, section headings, card titles, product names and prices, descriptions, captions, button labels, input labels, helper text, and errors. The platform system font is used for Android and iOS compatibility.
 
-## Spacing, radius, and shadows
+## Spacing, sizing, and surfaces
 
-`constants/spacing.ts` provides a 4px-based scale (`xs` through `3xl`) plus named layout values for screen padding, sections, component gaps, cards, buttons, inputs, and borders. Radius tokens are `sm` (6), `md` (10), `lg` (16), and `full`. `shadows.card` and `shadows.floating` provide platform-safe React Native shadow values.
+`constants/spacing.ts` provides the 4-point spacing scale, radius tokens, `layout`, `componentSize`, and restrained shadow presets. Shadows use `palette.deepDark`; `none`, `subtle`, `card`, and `floating` are available.
 
 ## Reusable components
 
-The existing primitives were retained and audited: `Button`, `Input`, `SearchBar`, `IconButton`, `Badge`, `Chip`, `ProductCard`, `CategoryStrip`, `ProductPrice`, `ScreenContainer`, headers, feedback states, skeletons, and cart rows. They keep their existing props and callbacks. Buttons expose disabled/loading states; inputs expose error styling and text; icon buttons expose selected/disabled accessibility state; badges support brand, dark, success, warning, and error tones.
+- `Button`: primary, secondary, outline, and ghost variants with loading and disabled states.
+- `Input`: labels, left/right content, error text, and muted placeholders.
+- `Badge`: brand, dark, success, warning, and error tones.
+- `IconButton`: consistent 40/48 touch targets with selected and disabled accessibility behavior.
+- `ProductCard`, `ProductImage`, and `ProductPrice`: shared product presentation with fallback behavior.
+- `ScreenContainer`, `AppHeader`, `TabBarIcon`, and `SectionHeader`: shared layout and navigation language.
+- `Skeleton`, `EmptyState`, `ErrorState`, and `AppNotice`: shared feedback states.
 
-Example:
+## Phase 1 audit status
 
-```tsx
-<Button label="Continue" fullWidth onPress={onContinue} />
-<Input label="Email" error={emailError} placeholder="you@example.com" />
-<Badge label="Low stock" tone="warning" />
-```
+Completed: approved palette, synchronized NativeWind tokens, shared typography and spacing tokens, reusable component styling, product-image fallback surfaces, and existing screen coverage.
 
-## Validation
+Not included: a Home Screen redesign, new features, or backend/API changes.
 
-Validation is run with `npx tsc --noEmit`, `npx expo lint`, `npx expo-doctor`, and `git diff --check`. Results are reported with the implementation handoff and are not inferred from configuration.
+Known validation limitation: Expo Doctor has previously hung without output in the local environment; it must complete successfully before that check is treated as passed.
