@@ -4,7 +4,7 @@ PostMart Mobile uses a Premium Minimal visual system. Deep Dark and Warm Off-Whi
 
 ## Color palette
 
-The source of truth is `constants/colors.ts`. Tailwind/NativeWind semantic names are synchronized in `tailwind.config.js`.
+The source of truth is `constants/palette.json`. `constants/colors.ts` consumes it for React Native semantic tokens, and `tailwind.config.js` consumes the same file for NativeWind semantic names.
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -18,57 +18,28 @@ The source of truth is `constants/colors.ts`. Tailwind/NativeWind semantic names
 | `warning` | `#A86200` | Warning states |
 | `error` | `#C62828` | Error states |
 
-Example:
-
-```tsx
-<Button label="Add to bag" variant="primary" />
-<Feather name="heart" color={isWishlisted ? colors.accent : colors.secondary} />
-```
-
 ## Typography
 
-The app uses the platform system font for reliable Android and iOS rendering. Semantic roles live in `constants/typography.ts` and preserve the existing scale:
-
-- `screenTitle`: 28/34, bold
-- `sectionHeading`: 22/28, semibold
-- `cardTitle`: 18/24, semibold
-- `productName`: 15/22, medium
-- `productPrice`: 16/22, semibold
-- `originalPrice`: 14/20, regular
-- `description` / `body`: 15/22, regular
-- `caption` / `helper` / `error`: 12/16
-- `buttonLabel`: 15/20, semibold
-- `inputLabel`: 15/22, medium
+Semantic roles live in `constants/typography.ts`: screen titles, section headings, card titles, product names and prices, descriptions, captions, button labels, input labels, helper text, and errors. The platform system font is used for Android and iOS compatibility.
 
 ## Spacing, sizing, and surfaces
 
-`constants/spacing.ts` provides the 4-point spacing scale (`xs` through `3xl`), radius tokens, shared layout values, component heights, and restrained shadow presets.
-
-- Screen horizontal padding: 16
-- Standard section gap: 24
-- Standard component gap: 12
-- Card padding: 16
-- Button and input height: 48
-- Small and medium icon-button targets: 40 and 48
-- Standard border width: 1
-- Default card/input radius: 10
-
-Shadows are optional and intentionally subtle. Flat borders and surface contrast are preferred.
+`constants/spacing.ts` provides the 4-point spacing scale, radius tokens, `layout`, `componentSize`, and restrained shadow presets. Shadows use `palette.deepDark`; `none`, `subtle`, `card`, and `floating` are available.
 
 ## Reusable components
 
 - `Button`: primary, secondary, outline, and ghost variants with loading and disabled states.
-- `Input`: label, placeholder, left/right content, error text, and muted placeholder support.
-- `Badge`: brand, dark, success, and warning tones.
-- `IconButton`: consistent 40/48 touch targets and selected state.
-- `ProductCard`, `ProductImage`, and `ProductPrice`: shared product presentation with preserved loading and fallback behavior.
-- `ScreenContainer`, `AppHeader`, `TabBarIcon`, and `SectionHeader`: shared screen layout and navigation language.
+- `Input`: labels, left/right content, error text, and muted placeholders.
+- `Badge`: brand, dark, success, warning, and error tones.
+- `IconButton`: consistent 40/48 touch targets with selected and disabled accessibility behavior.
+- `ProductCard`, `ProductImage`, and `ProductPrice`: shared product presentation with fallback behavior.
+- `ScreenContainer`, `AppHeader`, `TabBarIcon`, and `SectionHeader`: shared layout and navigation language.
 - `Skeleton`, `EmptyState`, `ErrorState`, and `AppNotice`: shared feedback states.
 
 ## Phase 1 audit status
 
-Completed: official palette, primary/accent separation, synchronized NativeWind tokens, shared screen backgrounds, reusable component styling, product-image fallback surfaces, and existing screen coverage.
+Completed: approved palette, synchronized NativeWind tokens, shared typography and spacing tokens, reusable component styling, product-image fallback surfaces, and existing screen coverage.
 
-Not included in Phase 1: a Home Screen redesign, new features, or backend/API changes. Those belong to later roadmap phases.
+Not included: a Home Screen redesign, new features, or backend/API changes.
 
-Known validation limitation: Expo Doctor has previously hung without output in the local environment; it must be rerun in a network-capable environment before treating that check as passed.
+Known validation limitation: Expo Doctor has previously hung without output in the local environment; it must complete successfully before that check is treated as passed.

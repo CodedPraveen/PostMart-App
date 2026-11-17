@@ -1,3 +1,5 @@
+import palette from './palette.json';
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -40,10 +42,24 @@ export const shadows = {
     elevation: 0,
   },
   subtle: {
-    shadowColor: '#171717',
+    shadowColor: palette.deepDark,
     shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+  },
+  card: {
+    shadowColor: palette.deepDark,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  floating: {
+    shadowColor: palette.deepDark,
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
 } as const;
