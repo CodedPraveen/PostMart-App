@@ -23,7 +23,7 @@ export function ProductImage({ uri, alt, className, ...props }: ProductImageProp
   }, []);
 
   return (
-    <View className={cn('overflow-hidden bg-[#F0F0ED]', className)}>
+    <View className={cn('overflow-hidden bg-background', className)}>
       {loading && !failed ? <Skeleton className="absolute inset-0 h-full w-full" /> : null}
       {failed ? (
         <View className="h-full w-full items-center justify-center p-4">

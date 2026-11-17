@@ -80,7 +80,7 @@ export function ProductDetailsScreen({ id }: ProductDetailsScreenProps) {
           onPress={() => toggleWishlist(product.id)}
           className="absolute right-5 top-5 h-12 w-12 items-center justify-center rounded-full bg-white"
         >
-          <Feather name="heart" size={22} color={isWishlisted ? colors.primary : colors.secondary} />
+          <Feather name="heart" size={22} color={isWishlisted ? colors.accent : colors.secondary} />
         </Pressable>
       </View>
 

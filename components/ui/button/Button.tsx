@@ -12,7 +12,7 @@ interface ButtonProps extends Omit<PressableProps, 'children'> {
 }
 
 const buttonClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-secondary',
+  primary: 'bg-primary',
   secondary: 'bg-white border border-border',
   outline: 'border border-secondary bg-transparent',
   ghost: 'bg-transparent',

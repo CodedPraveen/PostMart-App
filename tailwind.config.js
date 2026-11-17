@@ -10,12 +10,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#E54503',
-        secondary: '#1A1D1C',
-        background: '#F8F8F6',
+        primary: '#171717',
+        accent: '#E54503',
+        secondary: '#171717',
+        background: '#F7F7F5',
         surface: '#FFFFFF',
-        muted: '#6B6F6D',
-        border: '#E4E5E3',
+        muted: '#737373',
+        border: '#E5E5E3',
         success: '#18794E',
         warning: '#A86200',
         error: '#C62828',

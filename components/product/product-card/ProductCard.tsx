@@ -27,7 +27,7 @@ export const ProductCard = memo(function ProductCard({ product, width }: Product
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`View ${product.name}, ${product.price} rupees`}
-        className="aspect-[4/5] overflow-hidden rounded bg-[#F0F0ED]"
+        className="aspect-[4/5] overflow-hidden rounded bg-background"
         onPress={openProduct}
       >
         <ProductImage uri={product.image} alt={product.imageAlt} className="h-full w-full" />
@@ -38,7 +38,7 @@ export const ProductCard = memo(function ProductCard({ product, width }: Product
         ) : null}
       </Pressable>
       <IconButton
-        icon={<Feather name="heart" size={19} color={isWishlisted ? colors.primary : colors.secondary} />}
+        icon={<Feather name="heart" size={19} color={isWishlisted ? colors.accent : colors.secondary} />}
         selected={isWishlisted}
         accessibilityLabel={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
         className="absolute right-2 top-2"
