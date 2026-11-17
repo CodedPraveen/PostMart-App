@@ -40,7 +40,9 @@ export function HomeScreen() {
           actionLabel="See all"
           onAction={() => router.push(routes.category('all'))}
         />
-        {categoriesQuery.data ? <CategoryStrip categories={categoriesQuery.data} /> : null}
+        {!categoriesQuery.isError ? (
+          <CategoryStrip categories={categoriesQuery.data ?? []} loading={categoriesQuery.isPending} />
+        ) : null}
       </View>
 
       <View className="mt-10">
