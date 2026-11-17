@@ -4,14 +4,17 @@ import { router } from 'expo-router';
 import { colors } from '@/constants/colors';
 import { routes } from '@/constants/routes';
 import { useCartStore } from '@/store/cart/useCartStore';
+import { useWishlistStore } from '@/store/wishlist/useWishlistStore';
 
 interface AppHeaderProps {
   title?: string;
   showBack?: boolean;
+  showWishlist?: boolean;
 }
 
-export function AppHeader({ title, showBack = false }: AppHeaderProps) {
+export function AppHeader({ title, showBack = false, showWishlist = false }: AppHeaderProps) {
   const cartCount = useCartStore((state) => state.items.reduce((sum, item) => sum + item.quantity, 0));
+  const wishlistCount = useWishlistStore((state) => state.productIds.length);
 
   return (
     <View className="h-16 flex-row items-center justify-between px-5">
@@ -30,20 +33,35 @@ export function AppHeader({ title, showBack = false }: AppHeaderProps) {
         )}
         {title ? <Text className="text-lg font-semibold text-secondary">{title}</Text> : null}
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Cart with ${cartCount} items`}
-        hitSlop={10}
-        onPress={() => router.push(routes.cart)}
-        className="relative h-11 w-11 items-center justify-center"
-      >
-        <Feather name="shopping-bag" size={22} color={colors.secondary} />
-        {cartCount > 0 ? (
-          <View className="absolute right-0 top-0 min-w-5 items-center rounded-full bg-accent px-1 py-0.5">
-            <Text className="text-[10px] font-bold text-white">{Math.min(cartCount, 99)}</Text>
-          </View>
+      <View className="flex-row items-center gap-1">
+        {showWishlist ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Wishlist with ${wishlistCount} saved ${wishlistCount === 1 ? 'item' : 'items'}`}
+            accessibilityState={{ selected: wishlistCount > 0 }}
+            hitSlop={10}
+            onPress={() => router.push(routes.wishlist)}
+            className="relative h-11 w-11 items-center justify-center"
+          >
+            <Feather name="heart" size={22} color={colors.secondary} />
+            {wishlistCount > 0 ? <View className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" /> : null}
+          </Pressable>
         ) : null}
-      </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Cart with ${cartCount} items`}
+          hitSlop={10}
+          onPress={() => router.push(routes.cart)}
+          className="relative h-11 w-11 items-center justify-center"
+        >
+          <Feather name="shopping-bag" size={22} color={colors.secondary} />
+          {cartCount > 0 ? (
+            <View className="absolute right-0 top-0 min-w-5 items-center rounded-full bg-accent px-1 py-0.5">
+              <Text className="text-[10px] font-bold text-white">{Math.min(cartCount, 99)}</Text>
+            </View>
+          ) : null}
+        </Pressable>
+      </View>
     </View>
   );
 }
