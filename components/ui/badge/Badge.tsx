@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 
 interface BadgeProps {
   label: string;
-  tone?: 'brand' | 'dark' | 'success' | 'warning';
+  tone?: 'brand' | 'dark' | 'success' | 'warning' | 'error';
 }
 
 export function Badge({ label, tone = 'brand' }: BadgeProps) {
@@ -12,6 +12,7 @@ export function Badge({ label, tone = 'brand' }: BadgeProps) {
     dark: 'bg-secondary text-white',
     success: 'bg-success/10 text-success',
     warning: 'bg-warning/10 text-warning',
+    error: 'bg-error/10 text-error',
   } as const;
 
   return (
