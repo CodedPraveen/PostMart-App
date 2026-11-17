@@ -24,7 +24,7 @@ export function HomeScreen() {
   const featured = featuredQuery.data?.products.map(toUiProduct) ?? [];
   const trending = trendingQuery.data?.products.map(toUiProduct) ?? [];
   const newest = catalogQuery.data?.pages[0]?.items.filter((product) => product.isNew) ?? [];
-  const catalogError = featuredQuery.isError || trendingQuery.isError || catalogQuery.isError || categoriesQuery.isError;
+  const catalogError = featuredQuery.isError || trendingQuery.isError || catalogQuery.isError;
 
   return (
     <ScreenContainer>
@@ -40,9 +40,15 @@ export function HomeScreen() {
           actionLabel="See all"
           onAction={() => router.push(routes.category('all'))}
         />
-        {!categoriesQuery.isError ? (
+        {categoriesQuery.isError ? (
+          <ErrorState
+            title="Categories unavailable"
+            description="We could not load categories right now. Please try again."
+            onRetry={() => categoriesQuery.refetch()}
+          />
+        ) : (
           <CategoryStrip categories={categoriesQuery.data ?? []} loading={categoriesQuery.isPending} />
-        ) : null}
+        )}
       </View>
 
       <View className="mt-10">

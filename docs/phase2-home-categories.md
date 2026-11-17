@@ -10,8 +10,14 @@ Each card navigates through the existing `routes.category(item.slug)` route. The
 
 `CategoryStrip` now provides consistent 160px cards with bordered white surfaces, rounded corners, fixed image proportions, readable two-line names, hidden horizontal scroll indicators, and accessible card labels. Existing `ProductImage` loading/error behavior is reused for remote category images. Null images receive an explicit neutral fallback rather than a blank surface.
 
-The strip includes a small loading skeleton that follows the existing `Skeleton` component and an empty state when the API returns no categories. API errors continue to use Home’s existing shared `ErrorState`; no duplicate category error message was added.
+The strip includes a small loading skeleton that follows the existing `Skeleton` component and an empty state when the API returns no categories. Category API failures are now localized beneath the “Shop categories” heading with the shared `ErrorState`, a category-specific message, and a retry action that refetches the existing cached `useCategories()` query. The global Home error state remains responsible only for featured, trending, and latest-catalog failures, avoiding duplicate category errors while preserving its existing retry behavior.
 
 ## Scope and validation
 
-Only Home category browsing was changed. The header, search, hero campaign image, product sections, API calls, stores, and navigation architecture remain unchanged. Validation results are recorded in the task handoff; device testing was not available in this environment.
+Only Home category browsing and its localized error presentation were changed. The header, search, hero campaign image, product sections, API calls, stores, and navigation architecture remain unchanged. Validation results are recorded below; device testing was not available in this environment.
+
+## Validation
+
+- `npx tsc --noEmit`: passed
+- `npx expo lint`: passed
+- `git diff --check`: passed
